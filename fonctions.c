@@ -21,8 +21,8 @@ void *creation_memoire(void *sock)
     char *ptrCle = &cle[0];
     char *extention = ".c";
     FILE *fichier = NULL;
-    char *messages_precedants = (char *)malloc(TAILLE_MESSAGE * sizeof(char));
-    char *message_recu = (char *)malloc(TAILLE_MESSAGE * sizeof(char));
+    char *messages_precedants = (char *)malloc(TAILLE * sizeof(char));
+    char *message_recu = (char *)malloc(TAILLE * sizeof(char));
 
     read(newsock, ptrCle, TAILLE_MESSAGE);
     strrchr(cle, '\n')[0] = '\0';
@@ -57,10 +57,14 @@ void *creation_memoire(void *sock)
         strcpy(messages_precedants, shmaddr);
         printf("Messages précédants :\n");
         printf("%s", shmaddr);
+        write(newsock, shmaddr, TAILLE);
         printf("Vous pouvez maintenant écrire dans le channel %s\n", cle);
         while (1)
         {
-            read(newsock, message_recu, TAILLE_MESSAGE);
+            read(newsock, message_recu, TAILLE);
+            messages_precedants = realloc(messages_precedants, strlen(messages_precedants) + strlen(message_recu) + 1);
+            printf("Messages précédants :\n");
+            printf("%s", messages_precedants);
             if (strcmp(message_recu, "exit\n") == 0)
             {
                 printf("Vous êtes déconnecté du channel %s\n", cle);

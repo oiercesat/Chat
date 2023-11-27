@@ -20,6 +20,7 @@ int main( int argc, char *argv[]){
     int sock;
 
     char *messageEnvoyer = (char *)malloc(1024 * sizeof(char)); 
+    char *messages_precedents = (char *)malloc(1024 * sizeof(char));
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -39,6 +40,10 @@ int main( int argc, char *argv[]){
         printf("Veuillez saisir un serveur\n");
         fgets(cle, TAILLE, stdin);
         write(sock, ptrCle, TAILLE);
+
+        printf("Messages précédents : \n");
+        read(sock, messages_precedents, 1024);
+        printf("%s", messages_precedents);
 
         printf("Veuillez saisir un message\n");
         while (strcmp(messageEnvoyer, "exit\n") != 0)
