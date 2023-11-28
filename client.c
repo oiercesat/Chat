@@ -14,13 +14,14 @@ int main( int argc, char *argv[]){
 
     struct sockaddr_in sin;
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(atoi("8081"));
+    sin.sin_port = htons(atoi("8080"));
     sin.sin_addr.s_addr = inet_addr("127.01.01.01");
 
     int sock;
 
     char *messageEnvoyer = (char *)malloc(1024 * sizeof(char)); 
     char *messages_precedents = (char *)malloc(1024 * sizeof(char));
+    char *message_recu = (char *)malloc(1024 * sizeof(char));
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -46,13 +47,24 @@ int main( int argc, char *argv[]){
         printf("%s", messages_precedents);
 
         printf("Veuillez saisir un message\n");
-        while (strcmp(messageEnvoyer, "exit\n") != 0)
-        {
+        while (1) {
             fgets(messageEnvoyer, TAILLE, stdin);
             write(sock, messageEnvoyer, TAILLE);
-        }        
+
+            if (strcmp(messageEnvoyer, "exit\n") == 0) {
+                break;
+            }
+
+            read(sock, message_recu, TAILLE);
+            printf("Message reçu : \n");
+            printf("%s\n", message_recu);
+        }
     }
 
     close(sock);
-    
+    free(messageEnvoyer);
+    free(messages_precedents);
+    free(message_recu);
+
+    return 0;
 }

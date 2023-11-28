@@ -14,17 +14,24 @@
 #include "fonctions.c"
 
 void arret(int sig);
+void *creation_memoire_conteneur(void *arg);
 
 /* -------------------------------------------------------------------------- */
 
+struct Serveur{
+    int sock;
+    int newsock;
+    int nbSock;
+    int socks[10];
+};
+
 int sock=0;
-int newsock=0;
 
 int main(){
 
     struct sockaddr_in sin;
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(atoi("8081"));
+    sin.sin_port = htons(atoi("8080"));
     sin.sin_addr.s_addr = inet_addr("127.01.01.01");
 
     socklen_t sin_len = sizeof(sin);
@@ -48,14 +55,19 @@ int main(){
         return -1;
     }
 
+    struct Serveur serveur;
+    serveur.sock = sock;
+    serveur.newsock = 0;
+    serveur.nbSock = 0;
+
     while (1)
     {
         signal(SIGINT, &arret);
 
         pthread_t thread;
 
-        newsock = accept(sock, (struct sockaddr *)&sin, &sin_len);
-        if (newsock == -1)
+        serveur.newsock = accept(sock, (struct sockaddr *)&sin, &sin_len);
+        if (serveur.newsock == -1)
         {
             perror("Erreur lors de l'acceptation");
             return -1;
@@ -63,7 +75,9 @@ int main(){
         else
         {
             printf("Acceptation du client\n");
-            pthread_create(&thread, NULL, creation_memoire, (void*)&newsock);
+            pthread_create(&thread, NULL, creation_memoire_conteneur, (void*)&serveur);
+            serveur.socks[serveur.nbSock] = serveur.newsock;
+            serveur.nbSock++;
         }
     }
     
@@ -73,6 +87,12 @@ int main(){
 /* -------------------------------------------------------------------------- */
 /*    FONCTIONS SERVEUR NECESSITANT LES VARIABLES GLOBALES sock et newsock    */
 /* -------------------------------------------------------------------------- */
+
+void *creation_memoire_conteneur(void * arg){
+    struct Serveur *serveur = (struct Serveur *)arg;
+    creation_memoire(serveur->socks, serveur->newsock, serveur->nbSock);
+    return NULL;
+}
 
 void arret(int sig){
     printf("\nFermeture de la socket\n");

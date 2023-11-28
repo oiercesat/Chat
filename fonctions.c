@@ -8,12 +8,11 @@
 #define TAILLE 1024
 #define TAILLE_MESSAGE 140
 
-void *creation_memoire(void *sock);
+void *creation_memoire(int socks[10], int newsock, int nbSock);
 
-void *creation_memoire(void *sock)
+void *creation_memoire(int socks[10], int newsock, int nbSock)
 {
 
-    int newsock = *(int *)sock;
     key_t key;
     int shmid;
     char *shmaddr;
@@ -54,29 +53,46 @@ void *creation_memoire(void *sock)
         }
 
         printf("Vous êtes connecté au channel %s\n", cle);
-        strcpy(messages_precedants, shmaddr);
+        messages_precedants = strdup(shmaddr);
         printf("Messages précédants :\n");
         printf("%s", shmaddr);
         write(newsock, shmaddr, TAILLE);
         printf("Vous pouvez maintenant écrire dans le channel %s\n", cle);
         while (1)
         {
+            char *message_recu = (char *)malloc(TAILLE * sizeof(char));
             read(newsock, message_recu, TAILLE);
-            messages_precedants = realloc(messages_precedants, strlen(messages_precedants) + strlen(message_recu) + 1);
-            printf("Messages précédants :\n");
-            printf("%s", messages_precedants);
+
             if (strcmp(message_recu, "exit\n") == 0)
             {
                 printf("Vous êtes déconnecté du channel %s\n", cle);
+                free(message_recu);
                 break;
             }
             else
             {
-                printf("%s", message_recu);
+                printf("sock : %d\n", nbSock);
+                for (int i = 0; i < nbSock; i++)
+                {
+                    printf("ici \n");
+                    write(socks[i], message_recu, TAILLE);
+                }
+
+                // Réinitialisation et copie du contenu de shmaddr dans messages_precedants
+                free(messages_precedants);
+                messages_precedants = strdup(shmaddr);
+
+                // Augmentation de la taille de messages_precedants
+                messages_precedants = realloc(messages_precedants, strlen(messages_precedants) + strlen(message_recu) + 1);
                 strcat(messages_precedants, message_recu);
+
+                // Mise à jour du segment de mémoire partagée
                 strcpy(shmaddr, messages_precedants);
+
                 printf("Messages précédants :\n");
                 printf("%s", shmaddr);
+
+                free(message_recu);
             }
         }
     }
@@ -120,7 +136,6 @@ void *creation_memoire(void *sock)
                 printf("%s", message_recu);
             }
         }
-        
     }
 
     close(newsock);
