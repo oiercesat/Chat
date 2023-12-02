@@ -10,6 +10,14 @@
 
 void *creation_memoire(int socks[10], int newsock, int nbSock);
 
+char* ajoutPseudo(char* pseudo, char* message){
+    char* messageAvecPseudo = (char*)malloc(TAILLE_MESSAGE * sizeof(char));
+    strcpy(messageAvecPseudo, pseudo);
+    strcat(messageAvecPseudo, " : ");
+    strcat(messageAvecPseudo, message);
+    return messageAvecPseudo;
+}
+
 void *creation_memoire(int socks[10], int newsock, int nbSock)
 {
 
@@ -22,6 +30,11 @@ void *creation_memoire(int socks[10], int newsock, int nbSock)
     FILE *fichier = NULL;
     char *messages_precedants = (char *)malloc(TAILLE * sizeof(char));
     char *message_recu = (char *)malloc(TAILLE * sizeof(char));
+
+    char* pseudo = (char*)malloc(TAILLE_MESSAGE * sizeof(char));
+
+    read(newsock, pseudo, TAILLE_MESSAGE);
+    strrchr(pseudo, '\n')[0] = '\0';
 
     read(newsock, ptrCle, TAILLE_MESSAGE);
     strrchr(cle, '\n')[0] = '\0';
@@ -72,6 +85,8 @@ void *creation_memoire(int socks[10], int newsock, int nbSock)
             else
             {
 
+                // Ajout du pseudo au message
+                message_recu = ajoutPseudo(pseudo, message_recu);
                 // Réinitialisation et copie du contenu de shmaddr dans messages_precedants
                 free(messages_precedants);
                 messages_precedants = strdup(shmaddr);
@@ -142,3 +157,4 @@ void *creation_memoire(int socks[10], int newsock, int nbSock)
     close(newsock);
     return 0;
 }
+

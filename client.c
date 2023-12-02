@@ -42,6 +42,11 @@ int main(int argc, char *argv[])
     {
         printf("Vous êtes connecté au serveur \n");
 
+        char* pseudo = (char*)malloc(TAILLE * sizeof(char));
+        printf("Veuillez saisir un pseudo\n");
+        fgets(pseudo, TAILLE, stdin);
+        write(sock, pseudo, TAILLE);
+
         char cle[1024];
         printf("Veuillez saisir un serveur\n");
         fgets(cle, TAILLE, stdin);
