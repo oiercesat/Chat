@@ -9,19 +9,26 @@
 
 #define TAILLE 140
 
+int sock;
+char *messages_precedents;
 
-int main( int argc, char *argv[]){
+void *receiveMessages(void *arg)
+{
+    char *message_recu = (char *)malloc(TAILLE * sizeof(char));
+    while (1)
+    {
+        read(sock, message_recu, TAILLE);
+        printf("%s", message_recu);
+    }
+    free(message_recu);
+}
 
+int main(int argc, char *argv[])
+{
     struct sockaddr_in sin;
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(atoi("8080"));
+    sin.sin_port = htons(atoi("8081"));
     sin.sin_addr.s_addr = inet_addr("127.01.01.01");
-
-    int sock;
-
-    char *messageEnvoyer = (char *)malloc(1024 * sizeof(char)); 
-    char *messages_precedents = (char *)malloc(1024 * sizeof(char));
-    char *message_recu = (char *)malloc(1024 * sizeof(char));
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -35,36 +42,32 @@ int main( int argc, char *argv[]){
     {
         printf("Vous êtes connecté au serveur \n");
 
-        char* cle =(char*)malloc(1024*sizeof(char));
-        char* ptrCle = &cle[0];
-
+        char cle[1024];
         printf("Veuillez saisir un serveur\n");
         fgets(cle, TAILLE, stdin);
-        write(sock, ptrCle, TAILLE);
+        write(sock, cle, TAILLE);
+
+        messages_precedents = (char *)malloc(1024 * sizeof(char));
+
+        pthread_t receiveThread;
+        pthread_create(&receiveThread, NULL, receiveMessages, NULL);
 
         printf("Messages précédents : \n");
-        read(sock, messages_precedents, 1024);
-        printf("%s", messages_precedents);
-
-        printf("Veuillez saisir un message\n");
-        while (1) {
+        while (1)
+        {
+            char messageEnvoyer[TAILLE];
             fgets(messageEnvoyer, TAILLE, stdin);
             write(sock, messageEnvoyer, TAILLE);
 
-            if (strcmp(messageEnvoyer, "exit\n") == 0) {
+            if (strcmp(messageEnvoyer, "exit\n") == 0)
                 break;
-            }
-
-            read(sock, message_recu, TAILLE);
-            printf("Message reçu : \n");
-            printf("%s\n", message_recu);
         }
+
+        pthread_cancel(receiveThread); // Arrêt du thread de réception
+        free(messages_precedents);
     }
 
     close(sock);
-    free(messageEnvoyer);
-    free(messages_precedents);
-    free(message_recu);
 
     return 0;
 }

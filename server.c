@@ -31,7 +31,7 @@ int main(){
 
     struct sockaddr_in sin;
     sin.sin_family = AF_INET;
-    sin.sin_port = htons(atoi("8080"));
+    sin.sin_port = htons(atoi("8081"));
     sin.sin_addr.s_addr = inet_addr("127.01.01.01");
 
     socklen_t sin_len = sizeof(sin);

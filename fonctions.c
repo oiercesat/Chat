@@ -71,12 +71,6 @@ void *creation_memoire(int socks[10], int newsock, int nbSock)
             }
             else
             {
-                printf("sock : %d\n", nbSock);
-                for (int i = 0; i < nbSock; i++)
-                {
-                    printf("ici \n");
-                    write(socks[i], message_recu, TAILLE);
-                }
 
                 // Réinitialisation et copie du contenu de shmaddr dans messages_precedants
                 free(messages_precedants);
@@ -92,6 +86,13 @@ void *creation_memoire(int socks[10], int newsock, int nbSock)
                 printf("Messages précédants :\n");
                 printf("%s", shmaddr);
 
+                for (int i = 0; i < nbSock; i++)
+                {
+                    if (socks[i] != newsock)
+                    {
+                        write(socks[i], message_recu, TAILLE);
+                    }
+                }
                 free(message_recu);
             }
         }
