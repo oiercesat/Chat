@@ -12,6 +12,11 @@
 int sock;
 char *messages_precedents;
 
+/**
+ * Fonction qui reçoit les messages
+ * @param arg l'argument
+ * @return void
+ */
 void *receiveMessages(void *arg)
 {
     char *message_recu = (char *)malloc(TAILLE * sizeof(char));
@@ -32,6 +37,7 @@ int main(int argc, char *argv[])
 
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
+    //Connexion au serveur
     if (connect(sock, (struct sockaddr *)&sin, sizeof(sin)) == -1)
     {
         printf("Vous n'êtes pas connecté au serveur \n");
@@ -43,10 +49,13 @@ int main(int argc, char *argv[])
         printf("Vous êtes connecté au serveur \n");
 
         char* pseudo = (char*)malloc(TAILLE * sizeof(char));
+
+        // Envoi du pseudo au serveur
         printf("Veuillez saisir un pseudo\n");
         fgets(pseudo, TAILLE, stdin);
         write(sock, pseudo, TAILLE);
 
+        // Envoi du serveur au serveur
         char cle[1024];
         printf("Veuillez saisir un serveur\n");
         fgets(cle, TAILLE, stdin);
@@ -54,10 +63,13 @@ int main(int argc, char *argv[])
 
         messages_precedents = (char *)malloc(1024 * sizeof(char));
 
+        // Création du thread de réception des messages
         pthread_t receiveThread;
         pthread_create(&receiveThread, NULL, receiveMessages, NULL);
 
         printf("Messages précédents : \n");
+
+        // Envoi des messages au serveur
         while (1)
         {
             char messageEnvoyer[TAILLE];
