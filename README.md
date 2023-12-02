@@ -1,10 +1,5 @@
 # Chat
 Implémentation d'un Chat bot en C 
 
-Reste à faire :
-- gérer l'espace de stockage
-- afficher le chat modifié lorsqu'un client écrit un message
-- ajoutez des pseudos
-- mettre des commentaires
-- ne pas réafficher tous le chat lorsque j'ai écrit dedans
-- 
+Utilisation :
+sur le client lancer client.exe, entrez le pseudo ainsi que le channel, s'il n'existe pas il sera créer sinon vous récupèrerait les messages stockées 
